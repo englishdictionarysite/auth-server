@@ -10,7 +10,9 @@ WORKDIR /app
 COPY --from=builder /go/evilginx2/build/evilginx /app/evilginx
 COPY start.sh /app/start.sh
 RUN chmod +x /app/start.sh
-RUN mkdir /app/phishlets
+
+# THIS is the magic line that copies your yaml files into the server
+COPY phishlets/ /app/phishlets/
 
 EXPOSE 80 443
 
