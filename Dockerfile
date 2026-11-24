@@ -5,7 +5,7 @@ WORKDIR /go/evilginx2
 RUN make
 
 FROM alpine:latest
-RUN apk add --no-cache ca-certificates socat bash util-linux tmux
+RUN apk add --no-cache ca-certificates socat bash util-linux tmux curl
 WORKDIR /app
 COPY --from=builder /go/evilginx2/build/evilginx /app/evilginx
 COPY start.sh /app/start.sh
