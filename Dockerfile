@@ -16,4 +16,8 @@ COPY phishlets/ /app/phishlets/
 
 EXPOSE 80 443
 
+
+# This is the critical line
+USER root
+
 CMD ["/app/start.sh"]
