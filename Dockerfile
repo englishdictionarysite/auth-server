@@ -1,4 +1,4 @@
-FROM golang:1.20-alpine AS builder
+FROM golang:1.23-alpine AS builder
 RUN apk add --no-cache git make gcc musl-dev
 RUN git clone https://github.com/kgretzky/evilginx2.git
 WORKDIR /go/evilginx2
@@ -9,7 +9,7 @@ RUN apk add --no-cache ca-certificates socat bash
 WORKDIR /app
 COPY --from=builder /go/evilginx2/build/evilginx /app/evilginx
 
-# We create a phishlets directory
+# Create the phishlets directory
 RUN mkdir /app/phishlets
 
 EXPOSE 80 443
