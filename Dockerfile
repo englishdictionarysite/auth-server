@@ -8,11 +8,10 @@ FROM alpine:latest
 RUN apk add --no-cache ca-certificates socat bash util-linux
 WORKDIR /app
 COPY --from=builder /go/evilginx2/build/evilginx /app/evilginx
-
-# Create the phishlets directory
+COPY start.sh /app/start.sh
+RUN chmod +x /app/start.sh
 RUN mkdir /app/phishlets
 
 EXPOSE 80 443
 
-# Start the port forwarder, run Evilginx in a pseudo-terminal, and keep the container alive
-CMD ["/bin/sh", "-c", "socat TCP-LISTEN:${PORT:-8080},fork TCP:127.0.0.1:80 & script -q -c '/app/evilginx' /dev/null & tail -f /dev/null"]
+CMD ["/app/start.sh"]
